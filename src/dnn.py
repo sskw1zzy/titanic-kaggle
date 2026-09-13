@@ -6,6 +6,9 @@ import torch.optim as optim
 
 
 class DNNModel(nn.Module):
+    """Configurable MLP: any number of hidden layers, optional BatchNorm/Dropout,
+    switchable activation. Outputs a single raw logit (binary classification)."""
+    
     def __init__(self, input_size, hidden_sizes, dropout_p=0.0, use_batchnorm=False, activation='relu'):
         super().__init__()
         
@@ -36,6 +39,7 @@ class DNNModel(nn.Module):
         return x
 
 def prepare_dnn_data(X, y, batch_size):
+    """Wraps X/y into a shuffled DataLoader of float32 tensors."""
     X_tensor = torch.tensor(X.astype('float32').values, dtype=torch.float32)
     y_tensor = torch.tensor(y.astype('float32').values, dtype=torch.float32).unsqueeze(1)
     
@@ -77,6 +81,7 @@ def evaluate_dnn(model, loader):
     return correct / total
 
 def evaluate_dnn_kfold(X, y, seed, n_splits, model_params, train_params, optimizer_name='adam', scheduler_name=None):
+    """Stratified K-Fold CV accuracy for DNNModel with configurable optimizer/scheduler."""
     skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=seed)
     scores = []
     
@@ -92,9 +97,9 @@ def evaluate_dnn_kfold(X, y, seed, n_splits, model_params, train_params, optimiz
         
         if optimizer_name == 'adam':
             optimizer = optim.Adam(model.parameters(), lr=train_params['lr'])
-        if optimizer_name == 'adamw':
+        elif optimizer_name == 'adamw':
             optimizer = optim.AdamW(model.parameters(), lr=train_params['lr'])
-        if optimizer_name == 'sgd':
+        elif optimizer_name == 'sgd':
             optimizer = optim.SGD(model.parameters(), lr=train_params['lr'], momentum=0.9)
         
         if scheduler_name == 'cosine':
