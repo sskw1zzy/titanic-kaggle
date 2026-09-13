@@ -23,7 +23,7 @@ def add_bins(df, age_bins, fare_q, fare_bins=None):
 def add_title(df, common_titles):
     """Extracts a title from Name, keeps common_titles as-is, groups the rest as 'Rare'."""
     df = df.copy()
-    df['Title'] = df['Name'].str.extract(' ([A-Za-z]+)\.', expand=False)
+    df['Title'] = df['Name'].str.extract(r' ([A-Za-z]+)\.', expand=False)
     df['Title'] = df['Title'].replace({'Mlle': 'Miss', 'Ms': 'Miss', 'Mme': 'Mrs'})
     df.loc[~(df['Title'].isin(common_titles)), 'Title'] = 'Rare'
     return df
